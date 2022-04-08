@@ -1,4 +1,4 @@
-BINARY_NAME=gjango-mapp
+BINARY_NAME=gjango-myapp
 
 build:
 	echo "Building Gjango App"
@@ -8,6 +8,8 @@ run: build
 	echo "Starting Gjango App"
 	./tmp/${BINARY_NAME} &
 	echo "Gjango App Started"
+
+start: run
 
 clean:
 	echo "Cleaning"

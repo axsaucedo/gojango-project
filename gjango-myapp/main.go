@@ -1,18 +1,11 @@
 package main
 
-import (
-	"fmt"
+import "github.com/axsaucedo/gjango"
 
-	"github.com/axsaucedo/gjango"
-)
+type application struct {
+	App *gjango.Gjango
+}
 
 func main() {
-	result := gjango.TestFunc(1, 1)
-	fmt.Println(result)
-
-	result = gjango.TestFunc2(1, 1)
-	fmt.Println(result)
-
-	result = gjango.TestFunc3(1, 2)
-	fmt.Println(result)
+	initApplication()
 }
