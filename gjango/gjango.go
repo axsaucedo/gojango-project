@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/axsaucedo/gjango/render"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 )
@@ -23,6 +24,7 @@ type Gjango struct {
 	InfoLog  *log.Logger
 	RootPath string
 	Routes   *chi.Mux
+	Render   *render.Render
 	config   config
 }
 
@@ -66,6 +68,8 @@ func (g *Gjango) New(rootPath string) error {
 		renderer: os.Getenv("RENDERER"),
 	}
 
+	g.Render = g.createRenderer(g)
+
 	return nil
 }
 
@@ -93,7 +97,7 @@ func (g *Gjango) ListenAndServe() {
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%s", os.Getenv("PORT")),
 		ErrorLog:     g.ErrorLog,
-		Handler:      g.routes(),
+		Handler:      g.Routes,
 		IdleTimeout:  30 * time.Second,
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 600 * time.Second,
@@ -112,4 +116,13 @@ func (g *Gjango) startLoggers() (*log.Logger, *log.Logger) {
 	errorLog = log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	return infoLog, errorLog
+}
+
+func (g *Gjango) createRenderer(gOther *Gjango) *render.Render {
+	myRenderer := render.Render{
+		Renderer: gOther.config.renderer,
+		RootPath: gOther.RootPath,
+		Port:     gOther.config.port,
+	}
+	return &myRenderer
 }

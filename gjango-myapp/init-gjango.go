@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/axsaucedo/gjango"
+	"github.com/axsaucedo/gjango-myapp/handlers"
 )
 
 func initApplication() *application {
@@ -21,11 +22,16 @@ func initApplication() *application {
 
 	g.AppName = "myapp"
 
-	g.InfoLog.Println("Debug is set to", g.Debug)
-
-	app := &application{
+	myHandlers := &handlers.Handlers{
 		App: g,
 	}
+
+	app := &application{
+		App:      g,
+		Handlers: myHandlers,
+	}
+
+	app.App.Routes = app.routes()
 
 	return app
 }
