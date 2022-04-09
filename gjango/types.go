@@ -1,6 +1,6 @@
 package gjango
 
-type InitPaths struct {
+type initPaths struct {
 	rootPath    string
 	folderNames []string
 }

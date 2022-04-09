@@ -13,7 +13,6 @@ func initApplication() *application {
 		log.Fatal(err)
 	}
 
-	// Initialise celeritas
 	g := &gjango.Gjango{}
 	err = g.New(path)
 	if err != nil {
@@ -21,7 +20,8 @@ func initApplication() *application {
 	}
 
 	g.AppName = "myapp"
-	g.Debug = true
+
+	g.InfoLog.Println("Debug is set to", g.Debug)
 
 	app := &application{
 		App: g,
