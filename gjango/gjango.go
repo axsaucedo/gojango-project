@@ -27,18 +27,18 @@ type config struct {
 	renderer string
 }
 
-func (c *Gjango) New(rootPath string) error {
+func (g *Gjango) New(rootPath string) error {
 	pathConfig := initPaths{
 		rootPath:    rootPath,
 		folderNames: []string{"handlers", "migrations", "views", "data", "public", "tmp", "logs", "middleware"},
 	}
 
-	err := c.Init(pathConfig)
+	err := g.Init(pathConfig)
 	if err != nil {
 		return err
 	}
 
-	err = c.checkDotEnv(rootPath)
+	err = g.checkDotEnv(rootPath)
 	if err != nil {
 		return err
 	}
@@ -49,29 +49,34 @@ func (c *Gjango) New(rootPath string) error {
 	}
 
 	// create loggers
-	infoLog, errorLog := c.startLoggers()
-	c.InfoLog = infoLog
-	c.ErrorLog = errorLog
-	c.Debug, _ = strconv.ParseBool(os.Getenv("DEBUG"))
-	c.Version = version
-	c.RootPath = rootPath
+	infoLog, errorLog := g.startLoggers()
+	g.InfoLog = infoLog
+	g.ErrorLog = errorLog
+	g.Debug, _ = strconv.ParseBool(os.Getenv("DEBUG"))
+	g.Version = version
+	g.RootPath = rootPath
+
+	g.config = config{
+		port:     os.Getenv("PORT"),
+		renderer: os.Getenv("RENDERER"),
+	}
 
 	return nil
 }
 
-func (c *Gjango) checkDotEnv(path string) error {
-	err := c.CreateFileIfNotExist(fmt.Sprintf("%s/.env", path))
+func (g *Gjango) checkDotEnv(path string) error {
+	err := g.CreateFileIfNotExist(fmt.Sprintf("%s/.env", path))
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *Gjango) Init(p initPaths) error {
+func (g *Gjango) Init(p initPaths) error {
 	root := p.rootPath
 
 	for _, path := range p.folderNames {
-		err := c.CreateDirIfNotExist(filepath.Join(root + "/" + path))
+		err := g.CreateDirIfNotExist(filepath.Join(root + "/" + path))
 		if err != nil {
 			return err
 		}
@@ -79,7 +84,7 @@ func (c *Gjango) Init(p initPaths) error {
 	return nil
 }
 
-func (c *Gjango) startLoggers() (*log.Logger, *log.Logger) {
+func (g *Gjango) startLoggers() (*log.Logger, *log.Logger) {
 	var infoLog *log.Logger
 	var errorLog *log.Logger
 

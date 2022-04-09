@@ -4,7 +4,7 @@ import (
 	"os"
 )
 
-func (c *Gjango) CreateDirIfNotExist(path string) error {
+func (g *Gjango) CreateDirIfNotExist(path string) error {
 	const mode = 0755
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		err = os.Mkdir(path, mode)
@@ -16,7 +16,7 @@ func (c *Gjango) CreateDirIfNotExist(path string) error {
 	return nil
 }
 
-func (c *Gjango) CreateFileIfNotExist(path string) error {
+func (g *Gjango) CreateFileIfNotExist(path string) error {
 	var _, err = os.Stat(path)
 	if os.IsNotExist(err) {
 		var file, err = os.Create(path)
