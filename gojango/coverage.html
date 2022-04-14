@@ -55,7 +55,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/axsaucedo/gojango/render/render.go (65.5%)</option>
+				<option value="file0">github.com/axsaucedo/gojango/render/render.go (79.3%)</option>
 				
 				<option value="file1">github.com/axsaucedo/gojango/render/setup-test.go (0.0%)</option>
 				
@@ -111,13 +111,13 @@ func (r *Render) Page(w http.ResponseWriter, req *http.Request, view string, var
         case "jet":<span class="cov8" title="1">
                 return r.JetPage(w, req, view, vars, data)</span>
         }
-        <span class="cov0" title="0">return fmt.Errorf("error template not supported or provided: %s", r.Renderer)</span>
+        <span class="cov8" title="1">return fmt.Errorf("error template not supported or provided: %s", r.Renderer)</span>
 }
 
 // GoPage renders a standard Go template
 func (r *Render) GoPage(w http.ResponseWriter, req *http.Request, view string, data interface{}) error <span class="cov8" title="1">{
         tmpl, err := template.ParseFiles(fmt.Sprintf("%s/views/%s.page.tmpl", r.RootPath, view))
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return err
         }</span>
         <span class="cov8" title="1">td := &amp;TemplateData{}
@@ -149,7 +149,7 @@ func (r *Render) JetPage(w http.ResponseWriter, req *http.Request, templateName 
         }</span>
 
         <span class="cov8" title="1">t, err := r.JetViews.GetTemplate(fmt.Sprintf("%s.jet", templateName))
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 log.Println(err)
                 return err
         }</span>
