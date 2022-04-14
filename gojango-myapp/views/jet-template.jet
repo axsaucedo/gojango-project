@@ -1,0 +1,27 @@
+{{extends "./layouts/base.jet"}}
+
+{{block browserTitle()}}Jet Template{{end}}
+
+{{block css()}}
+
+{{end}}
+
+
+{{block pageContent()}}
+
+<div class="col text-center">
+    <div class="d-flex align-items-center justify-content-center mt-5">
+        <div>
+            <img src="/public/images/gojango.jpg" class="mb-5" style="width: 100px;height:auto;">
+            <h1>Gojango</h1>
+            <hr>
+            <small class="text-muted">Page generated with Jet engine</small>
+        </div>
+    </div>
+{{end}}
+
+
+{{block js()}}
+
+
+{{end}}
