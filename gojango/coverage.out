@@ -1,4 +1,17 @@
 mode: set
+github.com/axsaucedo/gojango/session/session.go:20.53,26.19 3 1
+github.com/axsaucedo/gojango/session/session.go:31.5,31.51 1 1
+github.com/axsaucedo/gojango/session/session.go:36.5,36.52 1 1
+github.com/axsaucedo/gojango/session/session.go:40.5,49.43 8 1
+github.com/axsaucedo/gojango/session/session.go:57.5,57.19 1 1
+github.com/axsaucedo/gojango/session/session.go:26.19,28.6 1 0
+github.com/axsaucedo/gojango/session/session.go:31.51,33.6 1 1
+github.com/axsaucedo/gojango/session/session.go:36.52,38.6 1 0
+github.com/axsaucedo/gojango/session/session.go:50.18,50.18 0 0
+github.com/axsaucedo/gojango/session/session.go:51.29,51.29 0 0
+github.com/axsaucedo/gojango/session/session.go:52.35,52.35 0 0
+github.com/axsaucedo/gojango/session/session.go:53.13,53.13 0 1
+github.com/axsaucedo/gojango/render/setup-test.go:21.29,23.2 1 0
 github.com/axsaucedo/gojango/render/render.go:34.108,35.37 1 1
 github.com/axsaucedo/gojango/render/render.go:41.2,41.79 1 1
 github.com/axsaucedo/gojango/render/render.go:36.12,37.38 1 1
@@ -20,4 +33,3 @@ github.com/axsaucedo/gojango/render/render.go:69.8,71.3 1 0
 github.com/axsaucedo/gojango/render/render.go:74.17,76.3 1 0
 github.com/axsaucedo/gojango/render/render.go:79.16,82.3 2 1
 github.com/axsaucedo/gojango/render/render.go:84.46,87.3 2 0
-github.com/axsaucedo/gojango/render/setup-test.go:21.29,23.2 1 0

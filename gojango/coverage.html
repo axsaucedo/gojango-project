@@ -59,6 +59,8 @@
 				
 				<option value="file1">github.com/axsaucedo/gojango/render/setup-test.go (0.0%)</option>
 				
+				<option value="file2">github.com/axsaucedo/gojango/session/session.go (88.2%)</option>
+				
 				</select>
 			</div>
 			<div id="legend">
@@ -187,6 +189,66 @@ func TestMain(m *testing.M) <span class="cov0" title="0">{
         os.Exit(m.Run())
 }</span>
 
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package session
+
+import (
+    "github.com/alexedwards/scs/v2"
+    "strings"
+    "strconv"
+    "time"
+    "net/http"
+)
+
+type Session struct {
+    CookieLifetime string
+    CookiePersist string
+    CookieName string
+    CookieDomain string
+    SessionType string
+    CookieSecure string
+}
+
+func (c *Session) InitSession() *scs.SessionManager <span class="cov8" title="1">{
+
+    var persist, secure bool
+
+    // how long should sessions last?
+    minutes, err := strconv.Atoi(c.CookieLifetime)
+    if err != nil </span><span class="cov0" title="0">{
+        minutes = 60
+    }</span>
+
+    // should cookies persist
+    <span class="cov8" title="1">if strings.ToLower(c.CookiePersist) == "true" </span><span class="cov8" title="1">{
+        persist = true
+    }</span>
+
+    // must cookies be secure?
+    <span class="cov8" title="1">if (strings.ToLower(c.CookieSecure)) == "true" </span><span class="cov0" title="0">{
+        secure = true
+    }</span>
+
+    <span class="cov8" title="1">session := scs.New()
+    session.Lifetime = time.Duration(minutes) * time.Minute
+    session.Cookie.Persist = persist
+    session.Cookie.Name = c.CookieName
+    session.Cookie.Secure = secure
+    session.Cookie.Domain = c.CookieDomain
+    session.Cookie.SameSite = http.SameSiteLaxMode
+
+    // which session store?
+    switch strings.ToLower(c.SessionType) </span>{
+    case "redis":<span class="cov0" title="0"></span> 
+    case "mysql", "mariadb":<span class="cov0" title="0"></span>
+    case "postgres", "postgresql":<span class="cov0" title="0"></span>
+    default:<span class="cov8" title="1"></span>
+        // cookie
+    }
+
+    <span class="cov8" title="1">return session</span>
+}
 </pre>
 		
 		</div>
