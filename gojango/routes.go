@@ -15,6 +15,7 @@ func (g *Gojango) routes() http.Handler {
 		mux.Use(middleware.Logger)
 	}
 	mux.Use(middleware.Recoverer)
+	mux.Use(g.SessionLoad)
 
 	return mux
 }

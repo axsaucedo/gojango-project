@@ -9,8 +9,11 @@ import (
 	"strconv"
 	"time"
 
-	jet "github.com/CloudyKit/jet/v6"
+	"github.com/CloudyKit/jet/v6"
+	//"github.com/alexedwards/scs/v2"
 	"github.com/axsaucedo/gojango/render"
+	"github.com/axsaucedo/gojango/scs"
+	"github.com/axsaucedo/gojango/session"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 )
@@ -26,13 +29,16 @@ type Gojango struct {
 	RootPath string
 	Routes   *chi.Mux
 	Render   *render.Render
+	Session  *scs.SessionManager
 	JetViews *jet.Set
 	config   config
 }
 
 type config struct {
-	port     string
-	renderer string
+	port        string
+	renderer    string
+	cookie      cookieConfig
+	sessionType string
 }
 
 func (g *Gojango) New(rootPath string) error {
@@ -68,7 +74,26 @@ func (g *Gojango) New(rootPath string) error {
 	g.config = config{
 		port:     os.Getenv("PORT"),
 		renderer: os.Getenv("RENDERER"),
+		cookie: cookieConfig{
+			name:     os.Getenv("COOKIE_NAME"),
+			lifetime: os.Getenv("COOKIE_LIFETIME"),
+			persist:  os.Getenv("COOKIE_PERSISTS"),
+			secure:   os.Getenv("COOKIE_SECURE"),
+			domain:   os.Getenv("COOKIE_DOMAIN"),
+		},
+		sessionType: os.Getenv("SESSION_TYPE"),
 	}
+
+	// create session
+	sess := session.Session{
+		CookieLifetime: g.config.cookie.lifetime,
+		CookiePersist:  g.config.cookie.persist,
+		CookieName:     g.config.cookie.name,
+		SessionType:    g.config.cookie.sessionType,
+		CookieDomain:   g.config.cookie.domain,
+	}
+
+	g.Session = sess.InitSession()
 
 	var views = jet.NewSet(
 		jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
