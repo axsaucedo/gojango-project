@@ -1,7 +1,7 @@
 package session
 
 import (
-    "github.com/axsaucedo/gojango/scs"
+    "github.com/alexedwards/scs/v2"
     "strings"
     "strconv"
     "time"

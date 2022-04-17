@@ -10,9 +10,8 @@ import (
 	"time"
 
 	"github.com/CloudyKit/jet/v6"
-	//"github.com/alexedwards/scs/v2"
+	"github.com/alexedwards/scs/v2"
 	"github.com/axsaucedo/gojango/render"
-	"github.com/axsaucedo/gojango/scs"
 	"github.com/axsaucedo/gojango/session"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
