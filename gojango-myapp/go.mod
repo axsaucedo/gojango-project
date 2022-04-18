@@ -8,6 +8,7 @@ require (
 	github.com/CloudyKit/jet/v6 v6.1.0
 	github.com/axsaucedo/gojango v0.0.0-00010101000000-000000000000
 	github.com/go-chi/chi/v5 v5.0.7
+	github.com/upper/db/v4 v4.5.2
 )
 
 require (
@@ -22,6 +23,7 @@ require (
 	github.com/jackc/pgtype v1.10.0 // indirect
 	github.com/jackc/pgx/v4 v4.15.0 // indirect
 	github.com/joho/godotenv v1.4.0 // indirect
-	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97 // indirect
-	golang.org/x/text v0.3.6 // indirect
+	github.com/lib/pq v1.10.4 // indirect
+	golang.org/x/crypto v0.0.0-20211209193657-4570a0811e8b // indirect
+	golang.org/x/text v0.3.7 // indirect
 )
