@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/axsaucedo/gojango"
+	"github.com/axsaucedo/gojango-myapp/data"
 	"github.com/axsaucedo/gojango-myapp/handlers"
 )
 
@@ -32,6 +33,8 @@ func initApplication() *application {
 	}
 
 	app.App.Routes = app.routes()
+
+	app.Models = data.New(app.App.DB.Pool)
 
 	return app
 }

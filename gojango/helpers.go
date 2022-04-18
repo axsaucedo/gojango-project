@@ -1,8 +1,25 @@
 package gojango
 
 import (
+	"crypto/rand"
 	"os"
 )
+
+const (
+	randomString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_+"
+)
+
+// Generates random string length from values in const randomstring
+func (c *Gojango) RandomString(n int) string {
+	s, r := make([]rune, n), []rune(randomString)
+
+	for i := range s {
+		p, _ := rand.Prime(rand.Reader, len(r))
+		x, y := p.Uint64(), uint64(len(r))
+		s[i] = r[x%y]
+	}
+	return string(s)
+}
 
 func (g *Gojango) CreateDirIfNotExist(path string) error {
 	const mode = 0755
