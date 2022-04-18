@@ -1,5 +1,7 @@
 package gojango
 
+import "database/sql"
+
 type initPaths struct {
 	rootPath    string
 	folderNames []string
@@ -12,4 +14,14 @@ type cookieConfig struct {
 	secure      string
 	domain      string
 	sessionType string
+}
+
+type databaseConfig struct {
+	dsn      string
+	database string
+}
+
+type Database struct {
+	DataType string
+	Pool     *sql.DB
 }
