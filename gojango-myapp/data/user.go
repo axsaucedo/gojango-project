@@ -49,7 +49,7 @@ func (u *User) GetByEmail(email string) (*User, error) {
 
 	var token Token
 	collection = upper.Collection(token.Table())
-	res = collection.Find(up.Cond{"user_id =": theUser.ID, "expiry <": time.Now()}).OrderBy("created_at desc")
+	res = collection.Find(up.Cond{"user_id =": theUser.ID, "expiry >": time.Now()}).OrderBy("created_at desc")
 	err = res.One(&token)
 	if err != nil {
 		if err != up.ErrNilRecord && err != up.ErrNoMoreRows {
@@ -74,7 +74,7 @@ func (u *User) Get(id int) (*User, error) {
 
 	var token Token
 	collection = upper.Collection(token.Table())
-	res = collection.Find(up.Cond{"user_id =": theUser.ID, "expiry <": time.Now()}).OrderBy("created_at desc")
+	res = collection.Find(up.Cond{"user_id =": theUser.ID, "expiry >": time.Now()}).OrderBy("created_at desc")
 	err = res.One(&token)
 	if err != nil {
 		if err != up.ErrNilRecord && err != up.ErrNoMoreRows {
@@ -150,15 +150,15 @@ func (u *User) ResetPassword(id int, password string) error {
 }
 
 func (u *User) PasswordMatches(plainText string) (bool, error) {
-    err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(plainText))
-    if err != nil {
-        switch {
-        case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
-            return false, nil
-        default:
-            return false, err
-        }
-    }
+	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(plainText))
+	if err != nil {
+		switch {
+		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
+			return false, nil
+		default:
+			return false, err
+		}
+	}
 
-    return true, nil
+	return true, nil
 }

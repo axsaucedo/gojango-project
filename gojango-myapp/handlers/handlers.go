@@ -5,10 +5,12 @@ import (
 
 	"github.com/CloudyKit/jet/v6"
 	"github.com/axsaucedo/gojango"
+	"github.com/axsaucedo/gojango-myapp/data"
 )
 
 type Handlers struct {
-	App *gojango.Gojango
+	App    *gojango.Gojango
+	Models data.Models
 }
 
 func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
