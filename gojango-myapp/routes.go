@@ -75,7 +75,7 @@ func (a *application) routes() *chi.Mux {
 		u.LastName = a.App.RandomString(10)
 		err = u.Update(*u)
 
-		fmt.Fprint(w, "updated last name to %s", u.LastName)
+		fmt.Fprintf(w, "updated last name to %s", u.LastName)
 	})
 
 	a.App.Routes.Get("/jet", func(w http.ResponseWriter, r *http.Request) {

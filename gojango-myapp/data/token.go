@@ -165,12 +165,12 @@ func (t *Token) AuthenticateToken(r *http.Request) (*User, error) {
 		return nil, errors.New("token wrong size")
 	}
 
-	t, err := t.GetByToken(token)
+	resultToken, err := t.GetByToken(token)
 	if err != nil {
 		return nil, errors.New("no matching token found")
 	}
 
-	if t.Expires.Before(time.Now()) {
+	if resultToken.Expires.Before(time.Now()) {
 		return nil, errors.New("expired token")
 	}
 
