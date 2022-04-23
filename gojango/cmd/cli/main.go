@@ -11,7 +11,7 @@ import (
 
 const version = "0.0.1"
 
-var g gojango.Gojango
+var gg gojango.Gojango
 
 func main() {
 	arg1, arg2, arg3, err := validateInput()
@@ -24,6 +24,14 @@ func main() {
 		showHelp()
 	case "version":
 		color.Yellow("Application version: " + version)
+	case "make":
+		if arg2 == "" {
+			exitGracefully(errors.New("make requires a subcommand: (migration|model|handler)"))
+		}
+		err = doMake(arg2, arg3)
+		if err != nil {
+			exitGracefully(err)
+		}
 	default:
 		log.Println(arg2, arg3)
 	}
