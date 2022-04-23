@@ -1,0 +1,520 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>data: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/axsaucedo/gojango-myapp/data/models.go (100.0%)</option>
+				
+				<option value="file1">github.com/axsaucedo/gojango-myapp/data/token.go (40.6%)</option>
+				
+				<option value="file2">github.com/axsaucedo/gojango-myapp/data/user.go (86.2%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package data
+
+import (
+        "database/sql"
+        "fmt"
+        "os"
+
+        db2 "github.com/upper/db/v4"
+        "github.com/upper/db/v4/adapter/mysql"
+        "github.com/upper/db/v4/adapter/postgresql"
+)
+
+var db *sql.DB
+var upper db2.Session
+
+type Models struct {
+        // any models inserted here (and in the New function)
+        // are easily accessible throughout the entire application
+    Users User
+    Tokens Token
+}
+
+func New(databasePool *sql.DB) Models <span class="cov8" title="1">{
+        db = databasePool
+
+        if os.Getenv("DATABASE_TYPE") == "mysql" || os.Getenv("DATABASE_TYPE") == "mariadb" </span><span class="cov8" title="1">{
+                upper, _ = mysql.New(databasePool)
+        }</span> else<span class="cov8" title="1"> {
+                upper, _ = postgresql.New(databasePool)
+        }</span>
+
+        <span class="cov8" title="1">return Models{
+        Users: User{},
+        Tokens: Token{},
+    }</span>
+}
+
+func getInsertID(i db2.ID) int <span class="cov8" title="1">{
+        idType := fmt.Sprintf("%T", i)
+        if idType == "int64" </span><span class="cov8" title="1">{
+                return int(i.(int64))
+        }</span>
+
+        <span class="cov8" title="1">return i.(int)</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package data
+
+import (
+        "crypto/rand"
+        "crypto/sha256"
+        "encoding/base32"
+        "errors"
+        "net/http"
+        "strings"
+        "time"
+
+        up "github.com/upper/db/v4"
+)
+
+type Token struct {
+        ID        int       `db:"id" json:"id"`
+        UserID    int       `db:"user_id" json:"user_id"`
+        FirstName string    `db:"first_name" json:"first_name"`
+        Email     string    `db:"email" json:"email"`
+        PlainText string    `db:"token" json:"token"`
+        Hash      []byte    `db:"token_hash" json:"-"`
+        CreatedAt time.Time `db:"created_at" json:"created_at"`
+        UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
+        Expires   time.Time `db:"expiry" json:"expiry"`
+}
+
+func (t *Token) Table() string <span class="cov8" title="1">{
+        return "tokens"
+}</span>
+
+func (t *Token) GetUserForToken(token string) (*User, error) <span class="cov8" title="1">{
+        var u User
+        var theToken Token
+
+        collection := upper.Collection(t.Table())
+        res := collection.Find(up.Cond{"token": token})
+        err := res.One(&amp;theToken)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">collection = upper.Collection("users")
+        res = collection.Find(up.Cond{"id": theToken.UserID})
+        err = res.One(&amp;u)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">u.Token = theToken
+
+        return &amp;u, nil</span>
+}
+
+func (t *Token) GetTokensForUser(id int) ([]*Token, error) <span class="cov8" title="1">{
+        var tokens []*Token
+        collection := upper.Collection(t.Table())
+        res := collection.Find(up.Cond{"user_id": id})
+        err := res.All(&amp;tokens)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return tokens, nil</span>
+}
+
+func (t *Token) Get(id int) (*Token, error) <span class="cov0" title="0">{
+        var token Token
+        collection := upper.Collection(t.Table())
+        res := collection.Find(up.Cond{"id": id})
+        err := res.One(&amp;token)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">return &amp;token, nil</span>
+}
+
+func (t *Token) GetByToken(plainText string) (*Token, error) <span class="cov0" title="0">{
+        var token Token
+        collection := upper.Collection(t.Table())
+        res := collection.Find(up.Cond{"token": plainText})
+        err := res.One(&amp;token)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">return &amp;token, nil</span>
+}
+
+func (t *Token) Delete(id int) error <span class="cov0" title="0">{
+        collection := upper.Collection(t.Table())
+        res := collection.Find(id)
+        err := res.Delete()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (t *Token) DeleteByToken(plainText string) error <span class="cov0" title="0">{
+        collection := upper.Collection(t.Table())
+        res := collection.Find(up.Cond{"token": plainText})
+        err := res.Delete()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (t *Token) Insert(token Token, u User) error <span class="cov8" title="1">{
+        collection := upper.Collection(t.Table())
+
+        // delete existing tokens
+        res := collection.Find(up.Cond{"user_id": u.ID})
+        err := res.Delete()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">token.CreatedAt = time.Now()
+        token.UpdatedAt = time.Now()
+        token.FirstName = u.FirstName
+        token.Email = u.Email
+
+        _, err = collection.Insert(token)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (t *Token) GenerateToken(userID int, ttl time.Duration) (*Token, error) <span class="cov8" title="1">{
+        token := &amp;Token{
+                UserID:  userID,
+                Expires: time.Now().Add(ttl),
+        }
+
+        randomBytes := make([]byte, 16)
+        _, err := rand.Read(randomBytes)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">token.PlainText = base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(randomBytes)
+        hash := sha256.Sum256([]byte(token.PlainText))
+        token.Hash = hash[:]
+        return token, nil</span>
+}
+
+func (t *Token) AuthenticateToken(r *http.Request) (*User, error) <span class="cov0" title="0">{
+        authorizationHeader := r.Header.Get("Authorization")
+        if authorizationHeader == "" </span><span class="cov0" title="0">{
+                return nil, errors.New("no authorization header received")
+        }</span>
+
+        <span class="cov0" title="0">headerParts := strings.Split(authorizationHeader, " ")
+        if len(headerParts) != 2 || headerParts[0] != "Bearer" </span><span class="cov0" title="0">{
+                return nil, errors.New("no authorization header received")
+        }</span>
+
+        <span class="cov0" title="0">token := headerParts[1]
+
+        if len(token) != 26 </span><span class="cov0" title="0">{
+                return nil, errors.New("token wrong size")
+        }</span>
+
+        <span class="cov0" title="0">resultToken, err := t.GetByToken(token)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, errors.New("no matching token found")
+        }</span>
+
+        <span class="cov0" title="0">if resultToken.Expires.Before(time.Now()) </span><span class="cov0" title="0">{
+                return nil, errors.New("expired token")
+        }</span>
+
+        <span class="cov0" title="0">user, err := t.GetUserForToken(token)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, errors.New("no matching user found")
+        }</span>
+
+        <span class="cov0" title="0">return user, nil</span>
+}
+
+func (t *Token) ValidToken(token string) (bool, error) <span class="cov0" title="0">{
+        user, err := t.GetUserForToken(token)
+        if err != nil </span><span class="cov0" title="0">{
+                return false, errors.New("no matching user found")
+        }</span>
+
+        <span class="cov0" title="0">if user.Token.PlainText == "" </span><span class="cov0" title="0">{
+                return false, errors.New("no matching token found")
+        }</span>
+
+        <span class="cov0" title="0">if user.Token.Expires.Before(time.Now()) </span><span class="cov0" title="0">{
+                return false, errors.New("expired token")
+        }</span>
+
+        <span class="cov0" title="0">return true, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package data
+
+import (
+        "errors"
+        "time"
+
+        up "github.com/upper/db/v4"
+        "golang.org/x/crypto/bcrypt"
+)
+
+type User struct {
+        ID        int       `db:"id,omitempty"`
+        FirstName string    `db:"first_name"`
+        LastName  string    `db:"last_name"`
+        Email     string    `db:"email"`
+        Active    int       `db:"user_active"`
+        Password  string    `db:"password"`
+        CreatedAt time.Time `db:"created_at"`
+        UpdatedAt time.Time `db:"updated_at"`
+        Token     Token     `db:"-"`
+}
+
+func (u *User) Table() string <span class="cov8" title="1">{
+        return "users"
+}</span>
+
+func (u *User) GetAll() ([]*User, error) <span class="cov8" title="1">{
+        collection := upper.Collection(u.Table())
+
+        var all []*User
+
+        res := collection.Find().OrderBy("last_name")
+        err := res.All(&amp;all)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return all, nil</span>
+}
+
+func (u *User) GetByEmail(email string) (*User, error) <span class="cov8" title="1">{
+        var theUser User
+        collection := upper.Collection(u.Table())
+
+        res := collection.Find(up.Cond{"email =": email})
+        err := res.One(&amp;theUser)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var token Token
+        collection = upper.Collection(token.Table())
+        res = collection.Find(up.Cond{"user_id =": theUser.ID, "expiry &gt;": time.Now()}).OrderBy("created_at desc")
+        err = res.One(&amp;token)
+        if err != nil </span><span class="cov8" title="1">{
+                if err != up.ErrNilRecord &amp;&amp; err != up.ErrNoMoreRows </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">theUser.Token = token
+
+        return &amp;theUser, nil</span>
+}
+
+func (u *User) Get(id int) (*User, error) <span class="cov8" title="1">{
+        var theUser User
+        collection := upper.Collection(u.Table())
+        res := collection.Find(up.Cond{"id =": id})
+
+        err := res.One(&amp;theUser)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var token Token
+        collection = upper.Collection(token.Table())
+        res = collection.Find(up.Cond{"user_id =": theUser.ID, "expiry &gt;": time.Now()}).OrderBy("created_at desc")
+        err = res.One(&amp;token)
+        if err != nil </span><span class="cov8" title="1">{
+                if err != up.ErrNilRecord &amp;&amp; err != up.ErrNoMoreRows </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">theUser.Token = token
+
+        return &amp;theUser, nil</span>
+}
+
+func (u *User) Update(theUser User) error <span class="cov8" title="1">{
+        theUser.UpdatedAt = time.Now()
+        collection := upper.Collection(u.Table())
+        res := collection.Find(theUser.ID)
+        err := res.Update(&amp;theUser)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (u *User) Delete(id int) error <span class="cov8" title="1">{
+        collection := upper.Collection(u.Table())
+        res := collection.Find(id)
+        err := res.Delete()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (u *User) Insert(theUser User) (int, error) <span class="cov8" title="1">{
+        newHash, err := bcrypt.GenerateFromPassword([]byte(theUser.Password), 12)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">theUser.CreatedAt = time.Now()
+        theUser.UpdatedAt = time.Now()
+        theUser.Password = string(newHash)
+
+        collection := upper.Collection(u.Table())
+        res, err := collection.Insert(theUser)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">id := getInsertID(res.ID())
+
+        return id, nil</span>
+}
+
+func (u *User) ResetPassword(id int, password string) error <span class="cov8" title="1">{
+        newHash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">theUser, err := u.Get(id)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">u.Password = string(newHash)
+        err = theUser.Update(*u)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (u *User) PasswordMatches(plainText string) (bool, error) <span class="cov8" title="1">{
+        err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(plainText))
+        if err != nil </span><span class="cov8" title="1">{
+                switch </span>{
+                case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):<span class="cov8" title="1">
+                        return false, nil</span>
+                default:<span class="cov0" title="0">
+                        return false, err</span>
+                }
+        }
+
+        <span class="cov8" title="1">return true, nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
