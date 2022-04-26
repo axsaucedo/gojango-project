@@ -19,7 +19,20 @@ func doMake(arg2, arg3 string) error {
 		upFile := gg.RootPath + "/migrations/" + fileName + "." + dbType + ".up.sql"
 		downFile := gg.RootPath + "/migrations/" + fileName + "." + dbType + ".down.sql"
 
-		fmt.Printf("%s %s\n", upFile, downFile)
+		err := copyFileFromTemplate("templates/migrations/migration."+dbType+".up.sql", upFile)
+		if err != nil {
+			exitGracefully(err)
+		}
+
+		err = copyFileFromTemplate("templates/migrations/migration."+dbType+".down.sql", downFile)
+		if err != nil {
+			exitGracefully(err)
+		}
+	case "auth":
+		err := doAuth()
+		if err != nil {
+			exitGracefully(err)
+		}
 	}
 
 	return nil
