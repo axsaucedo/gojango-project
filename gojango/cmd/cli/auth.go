@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -20,7 +21,13 @@ func doAuth() error {
 		exitGracefully(err)
 	}
 
-	err = copyDataToFile([]byte("drop table if exists users cascade"), downFile)
+	dropTableCmd := []string{
+		"drop table if exists users cascade;",
+		"drop table if exists tokens cascade;",
+		"drop table if exists remember_tokens cascade;",
+	}
+
+	err = copyDataToFile([]byte(strings.Join(dropTableCmd, " ")), downFile)
 	if err != nil {
 		exitGracefully(err)
 	}
@@ -30,9 +37,15 @@ func doAuth() error {
 		exitGracefully(err)
 	}
 
-	// run migrations
+	err = copyFileFromTemplate("templates/data/user.go.txt", gg.RootPath+"/data/user.go")
+	if err != nil {
+		exitGracefully(err)
+	}
 
-	// copy files over
+	err = copyFileFromTemplate("templates/data/token.go.txt", gg.RootPath+"/data/token.go")
+	if err != nil {
+		exitGracefully(err)
+	}
 
 	return nil
 }
