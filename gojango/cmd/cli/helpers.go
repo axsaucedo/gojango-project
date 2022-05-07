@@ -64,5 +64,6 @@ func showHelp() {
     migrate down          - reverses the most recent migration
     migrate reset         - runs all down migrations and then up
     make migration <name> - creates two new up and down migrations
+    make auth             - creates and runs migrations for auth tables & middleware
     `)
 }

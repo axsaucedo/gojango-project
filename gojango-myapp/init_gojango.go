@@ -7,6 +7,7 @@ import (
 	"github.com/axsaucedo/gojango"
 	"github.com/axsaucedo/gojango-myapp/data"
 	"github.com/axsaucedo/gojango-myapp/handlers"
+	"github.com/axsaucedo/gojango-myapp/middleware"
 )
 
 func initApplication() *application {
@@ -23,19 +24,25 @@ func initApplication() *application {
 
 	g.AppName = "myapp"
 
+	myMiddleware := &middleware.Middleware{
+		App: g,
+	}
+
 	myHandlers := &handlers.Handlers{
 		App: g,
 	}
 
 	app := &application{
-		App:      g,
-		Handlers: myHandlers,
+		App:        g,
+		Handlers:   myHandlers,
+		Middleware: myMiddleware,
 	}
 
 	app.App.Routes = app.routes()
 
 	app.Models = data.New(app.App.DB.Pool)
 	myHandlers.Models = app.Models
+	app.Middleware.Models = app.Models
 
 	return app
 }
