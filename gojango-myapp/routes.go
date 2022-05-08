@@ -26,7 +26,7 @@ func (a *application) routes() *chi.Mux {
 		u := data.User{
 			FirstName: "A",
 			LastName:  "S",
-			Email:     "admin@admin.com",
+			Email:     "me@here.com",
 			Active:    1,
 			Password:  "password",
 		}

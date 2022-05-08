@@ -35,11 +35,10 @@ type Gojango struct {
 }
 
 type config struct {
-	port        string
-	renderer    string
-	cookie      cookieConfig
-	sessionType string
-	database    databaseConfig
+	port     string
+	renderer string
+	cookie   cookieConfig
+	database databaseConfig
 }
 
 func (g *Gojango) New(rootPath string) error {
@@ -90,13 +89,13 @@ func (g *Gojango) New(rootPath string) error {
 		port:     os.Getenv("PORT"),
 		renderer: os.Getenv("RENDERER"),
 		cookie: cookieConfig{
-			name:     os.Getenv("COOKIE_NAME"),
-			lifetime: os.Getenv("COOKIE_LIFETIME"),
-			persist:  os.Getenv("COOKIE_PERSISTS"),
-			secure:   os.Getenv("COOKIE_SECURE"),
-			domain:   os.Getenv("COOKIE_DOMAIN"),
+			name:        os.Getenv("COOKIE_NAME"),
+			lifetime:    os.Getenv("COOKIE_LIFETIME"),
+			persist:     os.Getenv("COOKIE_PERSISTS"),
+			secure:      os.Getenv("COOKIE_SECURE"),
+			domain:      os.Getenv("COOKIE_DOMAIN"),
+			sessionType: os.Getenv("SESSION_TYPE"),
 		},
-		sessionType: os.Getenv("SESSION_TYPE"),
 		database: databaseConfig{
 			database: os.Getenv("DATABASE_TYPE"),
 			dsn:      g.BuildDSN(),
@@ -110,6 +109,7 @@ func (g *Gojango) New(rootPath string) error {
 		CookieName:     g.config.cookie.name,
 		SessionType:    g.config.cookie.sessionType,
 		CookieDomain:   g.config.cookie.domain,
+		DBPPool:        g.DB.Pool,
 	}
 
 	g.Session = sess.InitSession()
