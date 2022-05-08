@@ -85,11 +85,19 @@ func doMake(arg2, arg3 string) error {
 		}
 
 		fileName := gg.RootPath + "/data/" + strings.ToLower(modelName) + ".go"
+		if fileExists(fileName) {
+			exitGracefully(errors.New(fileName + " already exists."))
+		}
 
 		model = strings.ReplaceAll(model, "$MODELNAME$", strcase.ToCamel(modelName))
 		model = strings.ReplaceAll(model, "$TABLENAME$", strcase.ToCamel(tableName))
 
 		err = ioutil.WriteFile(fileName, []byte(model), 0644)
+		if err != nil {
+			exitGracefully(err)
+		}
+	case "session":
+		err := doSessionTable()
 		if err != nil {
 			exitGracefully(err)
 		}
