@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"path"
+	"path/filepath"
 )
 
 func (g *Gojango) WriteJSON(w http.ResponseWriter, status int, data interface{}, headers ...http.Header) error {
@@ -52,10 +53,10 @@ func (g *Gojango) WriteXML(w http.ResponseWriter, status int, data interface{}, 
 	return nil
 }
 
-func (g *Gojango) DownloadFile(w *http.ResponseWriter, r *http.Request, pathToFile, fileName string) error {
+func (g *Gojango) DownloadFile(w http.ResponseWriter, r *http.Request, pathToFile, fileName string) error {
 	fp := path.Join(pathToFile, fileName)
-	fileToServe := filePath.Clean(fp)
-	w.Header().Set("Content-Type", fmt.Sprintf("attachment; file=\"%s\"", fileName))
+	fileToServe := filepath.Clean(fp)
+	r.Header.Set("Content-Type", fmt.Sprintf("attachment; file=\"%s\"", fileName))
 	http.ServeFile(w, r, fileToServe)
 	return nil
 }
