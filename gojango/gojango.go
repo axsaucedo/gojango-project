@@ -11,9 +11,11 @@ import (
 
 	"github.com/CloudyKit/jet/v6"
 	"github.com/alexedwards/scs/v2"
+	"github.com/axsaucedo/gojango/cache"
 	"github.com/axsaucedo/gojango/render"
 	"github.com/axsaucedo/gojango/session"
 	"github.com/go-chi/chi/v5"
+	"github.com/gomodule/redigo/redis"
 	"github.com/joho/godotenv"
 )
 
@@ -33,6 +35,7 @@ type Gojango struct {
 	JetViews      *jet.Set
 	config        config
 	EncryptionKey string
+	Cache         cache.Cache
 }
 
 type config struct {
@@ -40,6 +43,7 @@ type config struct {
 	renderer string
 	cookie   cookieConfig
 	database databaseConfig
+	redis    redisConfig
 }
 
 func (g *Gojango) New(rootPath string) error {
@@ -61,6 +65,11 @@ func (g *Gojango) New(rootPath string) error {
 	err = godotenv.Load(filepath.Join(rootPath, "/.env"))
 	if err != nil {
 		return err
+	}
+
+	if os.Getenv("CACHE") == "redis" {
+		myRedisCache := g.createClientRedisCache()
+		g.Cache = myRedisCache
 	}
 
 	// create loggers
@@ -100,6 +109,11 @@ func (g *Gojango) New(rootPath string) error {
 		database: databaseConfig{
 			database: os.Getenv("DATABASE_TYPE"),
 			dsn:      g.BuildDSN(),
+		},
+		redis: redisConfig{
+			host:     os.Getenv("REDIS_HOST"),
+			password: os.Getenv("REDIS_PASSWORD"),
+			prefix:   os.Getenv("REDIS_PREFIX"),
 		},
 	}
 
@@ -185,6 +199,31 @@ func (g *Gojango) createRenderer() {
 		Session:  g.Session,
 	}
 	g.Render = &myRenderer
+}
+
+func (g *Gojango) createClientRedisCache() *cache.RedisCache {
+	cacheClient := cache.RedisCache{
+		Conn:   g.createRedisPool(),
+		Prefix: g.config.redis.prefix,
+	}
+	return &cacheClient
+}
+
+func (g *Gojango) createRedisPool() *redis.Pool {
+	return &redis.Pool{
+		MaxIdle:     50,
+		MaxActive:   10000,
+		IdleTimeout: 240 * time.Second,
+		Dial: func() (redis.Conn, error) {
+			return redis.Dial("tcp",
+				g.config.redis.host,
+				redis.DialPassword(g.config.redis.password))
+		},
+		TestOnBorrow: func(conn redis.Conn, t time.Time) error {
+			_, err := conn.Do("PING")
+			return err
+		},
+	}
 }
 
 func (c *Gojango) BuildDSN() string {
