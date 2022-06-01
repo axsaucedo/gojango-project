@@ -14,14 +14,14 @@ services:
     volumes:
       - ./_db-data/postgres/:/var/lib/postgresql/data/
 
-  ##  start Redis, and ensure that data is stored to a mounted volume
-  #redis:
-  #  image: 'redis:alpine'
-  #  ports:
-  #    - "6379:6379"
-  #  restart: always
-  #  volumes:
-  #    - ./_db-data/redis/:/data
+  #  start Redis, and ensure that data is stored to a mounted volume
+  redis:
+    image: 'redis:alpine'
+    ports:
+      - "6379:6379"
+    restart: always
+    volumes:
+      - ./_db-data/redis/:/data
 
   ##  start MariaDB, and ensure that data is stored to a mounted volume
   #mariadb:
