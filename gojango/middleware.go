@@ -16,7 +16,7 @@ func (g *Gojango) NoSurf(next http.Handler) http.Handler {
 	csrfHandler := nosurf.New(next)
 	secure, _ := strconv.ParseBool(g.config.cookie.secure)
 
-	csrfHandler.ExceptGlob("/api/*")
+	csrfHandler.ExemptGlob("/api/*")
 
 	csrfHandler.SetBaseCookie(http.Cookie{
 		HttpOnly: true,

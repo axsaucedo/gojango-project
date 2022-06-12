@@ -1,6 +1,10 @@
 package handlers
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/justinas/nosurf"
+)
 
 func (h *Handlers) ShowCachePage(w http.ResponseWriter, r *http.Request) {
 	err := h.render(w, r, "cache", nil, nil)
