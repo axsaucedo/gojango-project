@@ -21,6 +21,8 @@ import (
 
 const version = "1.0.0"
 
+var myRedisCache *cache.RedisCache
+
 type Gojango struct {
 	AppName       string
 	Debug         bool
@@ -39,11 +41,12 @@ type Gojango struct {
 }
 
 type config struct {
-	port     string
-	renderer string
-	cookie   cookieConfig
-	database databaseConfig
-	redis    redisConfig
+	port        string
+	renderer    string
+	cookie      cookieConfig
+	database    databaseConfig
+	redis       redisConfig
+	sessionType string
 }
 
 func (g *Gojango) New(rootPath string) error {
@@ -67,8 +70,8 @@ func (g *Gojango) New(rootPath string) error {
 		return err
 	}
 
-	if os.Getenv("CACHE") == "redis" {
-		myRedisCache := g.createClientRedisCache()
+	if os.Getenv("CACHE") == "redis" || os.Getenv("SESSION_TYPE") == "redis" {
+		myRedisCache = g.createClientRedisCache()
 		g.Cache = myRedisCache
 	}
 
@@ -115,6 +118,7 @@ func (g *Gojango) New(rootPath string) error {
 			password: os.Getenv("REDIS_PASSWORD"),
 			prefix:   os.Getenv("REDIS_PREFIX"),
 		},
+		sessionType: os.Getenv("SESSION_TYPE"),
 	}
 
 	// create session
@@ -124,17 +128,30 @@ func (g *Gojango) New(rootPath string) error {
 		CookieName:     g.config.cookie.name,
 		SessionType:    g.config.cookie.sessionType,
 		CookieDomain:   g.config.cookie.domain,
-		DBPPool:        g.DB.Pool,
+	}
+
+	switch g.config.sessionType {
+	case "redis":
+		sess.RedisPool = myRedisCache.Conn
+	case "mysql", "postgres", "mariadb", "postgresql":
+		sess.DBPool = g.DB.Pool
 	}
 
 	g.Session = sess.InitSession()
 
 	g.EncryptionKey = os.Getenv("KEY")
 
-	var views = jet.NewSet(
-		jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
-		jet.InDevelopmentMode(),
-	)
+	var views *jet.Set
+	if g.Debug {
+		views = jet.NewSet(
+			jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
+			jet.InDevelopmentMode(),
+		)
+	} else {
+		views = jet.NewSet(
+			jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
+		)
+	}
 
 	g.JetViews = views
 

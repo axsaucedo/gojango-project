@@ -36,6 +36,7 @@ type TemplateData struct {
 func (r *Render) defaultData(td *TemplateData, req *http.Request) *TemplateData {
 	td.Secure = r.Secure
 	td.ServerName = r.ServerName
+	td.CSRFToken = nosurf.Token(req)
 	td.Port = r.Port
 	if r.Session.Exists(req.Context(), "userID") {
 		td.IsAuthenticated = true

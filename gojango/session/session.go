@@ -10,7 +10,9 @@ import (
 
 	"github.com/alexedwards/scs/mysqlstore"
 	"github.com/alexedwards/scs/postgresstore"
+	"github.com/alexedwards/scs/redisstore"
 	"github.com/alexedwards/scs/v2"
+	"github.com/gomodule/redigo/redis"
 )
 
 type Session struct {
@@ -20,7 +22,8 @@ type Session struct {
 	CookieDomain   string
 	SessionType    string
 	CookieSecure   string
-	DBPPool        *sql.DB
+	DBPool         *sql.DB
+	RedisPool      *redis.Pool
 }
 
 func (c *Session) InitSession() *scs.SessionManager {
@@ -55,11 +58,12 @@ func (c *Session) InitSession() *scs.SessionManager {
 	log.Println(c.SessionType)
 	switch strings.ToLower(c.SessionType) {
 	case "redis":
+		session.Store = redisstore.New(c.RedisPool)
 	case "mysql", "mariadb":
-		session.Store = mysqlstore.New(c.DBPPool)
+		session.Store = mysqlstore.New(c.DBPool)
 	case "postgres", "postgresql":
 		log.Println("Init postgres sessions backend")
-		session.Store = postgresstore.New(c.DBPPool)
+		session.Store = postgresstore.New(c.DBPool)
 	default:
 		log.Println("Init postgres COOKIES backend")
 	}

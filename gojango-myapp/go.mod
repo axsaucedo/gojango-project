@@ -23,6 +23,7 @@ require (
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/alexedwards/scs/mysqlstore v0.0.0-20220216073957-c252878bcf5a // indirect
 	github.com/alexedwards/scs/postgresstore v0.0.0-20220216073957-c252878bcf5a // indirect
+	github.com/alexedwards/scs/redisstore v0.0.0-20220528130143-d93ace5be94b // indirect
 	github.com/alexedwards/scs/v2 v2.5.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
@@ -56,6 +57,7 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
 	github.com/jackc/pgtype v1.10.0 // indirect
 	github.com/joho/godotenv v1.4.0 // indirect
+	github.com/justinas/nosurf v1.1.1 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/lib/pq v1.10.4 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
