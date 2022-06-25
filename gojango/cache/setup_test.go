@@ -38,9 +38,9 @@ func TestMain(m *testing.M) {
 
 	defer testRedisCache.Conn.Close()
 
-	_ = os.RemoveAll("./testdata/tmp/badger")
+	_ = os.RemoveAll("./testdata/tmp")
 
-	if _, err := os.Stat("./testdata/tmp/badger"); os.IsNotExist(err) {
+	if _, err := os.Stat("./testdata/tmp"); os.IsNotExist(err) {
 		err := os.Mkdir("./testdata/tmp", 0755)
 		if err != nil {
 			log.Fatal(err)

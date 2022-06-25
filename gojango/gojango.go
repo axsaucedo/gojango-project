@@ -14,14 +14,19 @@ import (
 	"github.com/axsaucedo/gojango/cache"
 	"github.com/axsaucedo/gojango/render"
 	"github.com/axsaucedo/gojango/session"
+	"github.com/dgraph-io/badger/v3"
 	"github.com/go-chi/chi/v5"
 	"github.com/gomodule/redigo/redis"
 	"github.com/joho/godotenv"
+	"github.com/robfig/cron/v3"
 )
 
 const version = "1.0.0"
 
 var myRedisCache *cache.RedisCache
+var myBadgerCache *cache.BadgerCache
+var redisPool *redis.Pool
+var badgerConn *badger.DB
 
 type Gojango struct {
 	AppName       string
@@ -38,6 +43,7 @@ type Gojango struct {
 	config        config
 	EncryptionKey string
 	Cache         cache.Cache
+	Scheduler     *cron.Cron
 }
 
 type config struct {
@@ -70,9 +76,26 @@ func (g *Gojango) New(rootPath string) error {
 		return err
 	}
 
+	scheduler := cron.New()
+	g.Scheduler = scheduler
+
 	if os.Getenv("CACHE") == "redis" || os.Getenv("SESSION_TYPE") == "redis" {
 		myRedisCache = g.createClientRedisCache()
 		g.Cache = myRedisCache
+		redisPool = myRedisCache.Conn
+	}
+
+	if os.Getenv("CACHE") == "badger" {
+		myBadgerCache = g.createClientBadgerCache()
+		g.Cache = myBadgerCache
+		badgerConn = myBadgerCache.Conn
+
+		_, err = g.Scheduler.AddFunc("@daily", func() {
+			_ = myBadgerCache.Conn.RunValueLogGC(0.7)
+		})
+		if err != nil {
+			return err
+		}
 	}
 
 	// create loggers
@@ -190,7 +213,17 @@ func (g *Gojango) ListenAndServe() {
 		WriteTimeout: 600 * time.Second,
 	}
 
-	defer g.DB.Pool.Close()
+	if g.DB.Pool != nil {
+		defer g.DB.Pool.Close()
+	}
+
+	if redisPool != nil {
+		defer redisPool.Close()
+	}
+
+	if badgerConn != nil {
+		defer badgerConn.Close()
+	}
 
 	g.InfoLog.Printf("Listening on port %s", os.Getenv("PORT"))
 	err := srv.ListenAndServe()
@@ -226,6 +259,13 @@ func (g *Gojango) createClientRedisCache() *cache.RedisCache {
 	return &cacheClient
 }
 
+func (g *Gojango) createClientBadgerCache() *cache.BadgerCache {
+	cacheClient := cache.BadgerCache{
+		Conn: g.createBadgerConn(),
+	}
+	return &cacheClient
+}
+
 func (g *Gojango) createRedisPool() *redis.Pool {
 	return &redis.Pool{
 		MaxIdle:     50,
@@ -241,6 +281,14 @@ func (g *Gojango) createRedisPool() *redis.Pool {
 			return err
 		},
 	}
+}
+
+func (g Gojango) createBadgerConn() *badger.DB {
+	db, err := badger.Open(badger.DefaultOptions(g.RootPath + "/tmp/badger"))
+	if err != nil {
+		return nil
+	}
+	return db
 }
 
 func (c *Gojango) BuildDSN() string {
