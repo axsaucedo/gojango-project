@@ -100,8 +100,6 @@ func (g *Gojango) New(rootPath string) error {
 		}
 	}
 
-	g.Mail = g.createMailer()
-
 	// create loggers
 	infoLog, errorLog := g.startLoggers()
 	g.InfoLog = infoLog
@@ -110,6 +108,9 @@ func (g *Gojango) New(rootPath string) error {
 	g.Version = version
 	g.RootPath = rootPath
 	g.Routes = g.routes().(*chi.Mux)
+
+	// Create mailer once all components set
+	g.Mail = g.createMailer()
 
 	// connect to database
 	if os.Getenv("DATABASE_TYPE") != "" {
