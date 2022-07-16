@@ -52,6 +52,22 @@ func (a *application) routes() *chi.Mux {
 		if res.Error != nil {
 			a.App.ErrorLog.Println(res.Error)
 		}
+
+		fmt.Fprint(w, "Sent mail using channel")
+	})
+
+	a.get("/test-mail-func", func(w http.ResponseWriter, r *http.Request) {
+		msg := mailer.Message{
+			From:        "test@example.com",
+			To:          "you@there.com",
+			Subject:     "Test Subject - sent using func",
+			Template:    "test",
+			Attachments: nil,
+			Data:        nil,
+		}
+		a.App.Mail.SendSMTPMessage(msg)
+
+		fmt.Fprint(w, "Sent mail using func")
 	})
 
 	a.get("/create-user", func(w http.ResponseWriter, r *http.Request) {
