@@ -12,6 +12,7 @@ import (
 	"github.com/CloudyKit/jet/v6"
 	"github.com/alexedwards/scs/v2"
 	"github.com/axsaucedo/gojango/cache"
+	"github.com/axsaucedo/gojango/mailer"
 	"github.com/axsaucedo/gojango/render"
 	"github.com/axsaucedo/gojango/session"
 	"github.com/dgraph-io/badger/v3"
@@ -44,6 +45,7 @@ type Gojango struct {
 	EncryptionKey string
 	Cache         cache.Cache
 	Scheduler     *cron.Cron
+	Mail          mailer.Mail
 }
 
 type config struct {
@@ -58,7 +60,7 @@ type config struct {
 func (g *Gojango) New(rootPath string) error {
 	pathConfig := initPaths{
 		rootPath:    rootPath,
-		folderNames: []string{"handlers", "migrations", "views", "data", "public", "tmp", "logs", "middleware"},
+		folderNames: []string{"handlers", "migrations", "views", "mail", "data", "public", "tmp", "logs", "middleware"},
 	}
 
 	err := g.Init(pathConfig)
@@ -97,6 +99,8 @@ func (g *Gojango) New(rootPath string) error {
 			return err
 		}
 	}
+
+	g.Mail = g.createMailer()
 
 	// create loggers
 	infoLog, errorLog := g.startLoggers()
@@ -179,6 +183,7 @@ func (g *Gojango) New(rootPath string) error {
 	g.JetViews = views
 
 	g.createRenderer()
+	go g.Mail.ListenForMail()
 
 	return nil
 }
@@ -249,6 +254,28 @@ func (g *Gojango) createRenderer() {
 		Session:  g.Session,
 	}
 	g.Render = &myRenderer
+}
+
+func (g *Gojango) createMailer() mailer.Mail {
+	port, _ := strconv.Atoi(os.Getenv("SMTP_PORT"))
+	m := mailer.Mail{
+		Domain:      os.Getenv("MAIL_DOMAIN"),
+		Templates:   g.RootPath + "/mail",
+		Host:        os.Getenv("SMTP_HOST"),
+		Port:        port,
+		Username:    os.Getenv("SMTP_USERNAME"),
+		Password:    os.Getenv("SMTP_PASSWORD"),
+		Encryption:  os.Getenv("SMTP_ENCRYPTION"),
+		FromName:    os.Getenv("FROM_NAME"),
+		FromAddress: os.Getenv("FROM_ADDRESS"),
+		Jobs:        make(chan mailer.Message, 20),
+		Results:     make(chan mailer.Result, 20),
+		API:         os.Getenv("MAILER_API"),
+		APIKey:      os.Getenv("MAILER_KEY"),
+		APIUrl:      os.Getenv("MAILER_URL"),
+	}
+
+	return m
 }
 
 func (g *Gojango) createClientRedisCache() *cache.RedisCache {
